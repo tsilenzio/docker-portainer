@@ -1,0 +1,30 @@
+services:
+  portainer:
+    image: portainer/portainer-ee
+    container_name: portainer
+    restart: always
+    pull_policy: always
+    ports:
+      - "8000:8000"
+      - "${HTTPS_PORT}:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - caddy_network
+    labels:
+      caddy: portainer.tsilenz.io
+      caddy.reverse_proxy: "{{upstreams ${HTTPS_PORT}}}"
+      caddy.reverse_proxy.transport: http
+      caddy.reverse_proxy.transport.tls_insecure_skip_verify:
+      caddy.tls.dns: "cloudflare ${CF_API_TOKEN}"
+
+networks:
+  caddy_network:
+    external: true
+
+volumes:
+  portainer_data:
+    external: true
+  caddy_data:
+    external: true
